@@ -1,9 +1,9 @@
 //============================================================================
 // Name        : HistSim.cpp
-// Author      : 
-// Version     :
-// Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Author      : Nico Herbig
+// Version     : 0.1
+// Copyright   : (C) 2015 Nico Herbig
+// Description : Main file for histone simulation
 //============================================================================
 
 #include <iostream>
