@@ -180,5 +180,7 @@ int main() {
 	
 	//initializing random number generator
 
+	//TOAST
+
 	return 0;
 }
