@@ -155,7 +155,30 @@ int main() {
 
 	//rapidxml::print(std::cout,doc,0);
 
+	
 
+	/* needed vars
+	 
+	int nNucleosomes
+    int nSimulations
+    int gRandSeed   
+    int nReplications
+    int visualizationState
+    float replicationFreq 
+    std::string outDirectory 
+	std::string initialState
+	
+	*/
+	
+	//initializing nucleosome list / chromatin
+	
+	std::string test = "eintrag1|eintrag2";
+	
+	
+	
+	//cout << 
+	
+	//initializing random number generator
 
 	return 0;
 }
