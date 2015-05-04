@@ -14,11 +14,13 @@
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
 #include "rapidxml/rapidxml_print.hpp"
-
+//#include "helper.hpp"
+#include "chromatin.hpp"
 
 //using namespace std;
 
-int main() {
+int main()
+{
 
 	int verbose = 1;
 
@@ -29,11 +31,17 @@ int main() {
 
 	doc.parse<0>(xmlFile.data());
 
+
+	//table to store simulation parameters (keyis string, values either string or int
 	std::map< std::string, boost::variant<std::string, int> > simparams;
+
+
 
 	rapidxml::xml_node<> *node = doc.first_node("nNucleosomes");
 
 	rapidxml::xml_attribute<> *attr;
+
+	std::cout << "\nGetting number of nucleosomes: \n \n";
 
 	if(node)
 	{
@@ -43,7 +51,7 @@ int main() {
 
 		if(verbose)
 		{
-			std::cout << "Number of nucleosomes: " << attr->value() << "\n ";
+			std::cout << " Number of nucleosomes: " << simparams["nNucleosomes"] << "\n ";
 		}
 
 
@@ -51,20 +59,22 @@ int main() {
 	else
 	{
 		std::cout << "Number of nucleosomes not defined! \n";
-
+		exit(1);
 	}
 
 	node = doc.first_node("histoneModifications");
 
 	//TODO: support for multiple modification instances
 
+	std::cout << "\nGetting modifications: \n \n ";
+
 	if(node)
 	{
 		for (rapidxml::xml_node<> *child = node->first_node(); child; child = child->next_sibling())
 		{
-			attr = child->first_attribute("type");
+			attr = child->first_attribute("name");
 
-			simparams["modtype"] = attr->value();
+			simparams["modname"] = attr->value();
 
 			attr = child->first_attribute("value");
 
@@ -72,7 +82,7 @@ int main() {
 
 			if(verbose)
 			{
-				std::cout << "Modification type: " << simparams["modtype"] << "\n ";
+				std::cout << "Modification name: " << simparams["modname"] << "\n ";
 				std::cout << "Modification value: " << simparams["modvalue"] << "\n ";
 			}
 		}
@@ -80,20 +90,23 @@ int main() {
 	else
 	{
 		std::cout << "Histone modifications not defined! \n";
+		exit(1);
 	}
 
 
 	node = doc.first_node("cyclicChromosomes");
 
+	std::cout << "\nGetting cyclic info: \n \n ";
+
 	if(node)
 	{
 		attr = node->first_attribute("value");
 
-		simparams["cyclicChromosomes"] = attr->value();
+		simparams["cyclic"] = attr->value();
 
 		if(verbose)
 		{
-			std::cout << "Cyclic chromosomes: " << attr->value() << "\n ";
+			std::cout << "Cyclic chromosomes: " << simparams["cyclic"] << "\n ";
 		}
 
 
@@ -101,27 +114,42 @@ int main() {
 	else
 	{
 			std::cout << "Cyclic chromosomes not defined! \n";
-
+			exit(1);
 	}
 
 
 	node = doc.first_node("initialState");
 
+
+	std::cout << "\nGetting initial state: \n \n ";
+
+
+	simparams["initstate"] = "(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])|(H3[27.4])(H4[5.2])";
+
 	//TODO: support for multiple modification instances
 
-	if(node)
+	/*if(node)
 	{
-		for (rapidxml::xml_node<> *child = node->first_node(); child; child = child->next_sibling())
-		{
-			attr = child->first_attribute("type");
+		//std::cout << "TEST \n ";
+		//for (rapidxml::xml_node<> *child = node->first_node(); child; child = child->next_sibling())
+		//{
+			//attr = child->first_attribute("type");
+
+			attr = node->first_attribute("type");
+
 
 			std::string tmpstr = attr->value();
 
-			if(!tmpstr.compare("custom"))
+
+
+			if(tmpstr.compare("custom") == 0)
 			{
 				simparams["initstate"] = node->first_attribute("value")->value();
+
+
+
 			}
-			else if(!tmpstr.compare("twoParts"))
+			/*else if(!tmpstr.compare("twoParts"))
 			{
 
 				std::string& tmpstr = boost::get<std::string>(simparams["nNucleosomes"]);
@@ -135,50 +163,52 @@ int main() {
 
 			}
 
-
+			*/
 
 
 			if(verbose)
 			{
 				std::cout << "Initial state: " << simparams["initstate"] << "\n ";
+
 			}
 
-		}
-	}
+		//}
+	/*}
 	else
-	{
-		std::cout << "Number of nucleosomes not defined! \n";
-
+	//{
+		std::cout << "Initial state not defined! \n";
+		exit(1);
 	}
-
-
-
-	//rapidxml::print(std::cout,doc,0);
-
-	
-
-	/* needed vars
-	 
-	int nNucleosomes
-    int nSimulations
-    int gRandSeed   
-    int nReplications
-    int visualizationState
-    float replicationFreq 
-    std::string outDirectory 
-	std::string initialState
-	
 	*/
+
+
+	std::cout << " \nSetting up objects... \n \n";
+
+
+
+
+
 	
 	//initializing nucleosome list / chromatin
 	
-	std::string test = "eintrag1|eintrag2";
+	std::vector<int> originpos;
+	//std::cout << "Test1 \n";
+	std::vector<int>::iterator it;
+	it = originpos.begin();
+	originpos.insert(it,0);
+	//std::cout << "Test2 \n";
+
+	chromatin initialchromatin(simparams.at("nNucleosomes"), simparams.at("initstate"), simparams.at("cyclic"), originpos);
+
+	//chromatin* initialchromatin = new chromatin(simparams.at("nNucleosomes"), simparams.at("initstate"), simparams.at("cyclic"), originpos);
+
+
 	
-	
-	
-	//cout << 
-	
+
 	//initializing random number generator
+	std::cout << "Initializing rand... \n";
+	
+	//initialchromatin.mPrintInfo();
 
 	//TOAST
 
